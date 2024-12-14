@@ -81,31 +81,21 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Get key states (for continuous movement)
-    keys = pygame.key.get_pressed()
-
-    if keys[pygame.K_d] and last_key != pygame.K_d:
-        # Start moving right if 'D' is pressed
-        moving_right = True
-        moving_left = False
-        is_idle = False
-        last_key = pygame.K_d
-        frame_index = 0  # Reset frame index for run animation
-
-    elif keys[pygame.K_a] and last_key != pygame.K_a:
-        # Start moving left if 'A' is pressed
-        moving_left = True
-        moving_right = False
-        is_idle = False
-        last_key = pygame.K_a
-        frame_index = 0  # Reset frame index for run animation
-
-    elif not keys[pygame.K_a] and not keys[pygame.K_d]:
-        # If no movement keys are pressed, go idle
-        moving_left = False
-        moving_right = False
-        is_idle = True
-        last_key = None
+        # Handle mouse touch (click) event
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = event.pos  # Get the position of the touch (or mouse click)
+            if mouse_x < screen_width / 2:  # Left half of the screen (move left)
+                moving_left = True
+                moving_right = False
+                is_idle = False
+                last_key = pygame.K_a  # Simulate "A" key press (left)
+                frame_index = 0  # Reset frame index for run animation
+            else:  # Right half of the screen (move right)
+                moving_right = True
+                moving_left = False
+                is_idle = False
+                last_key = pygame.K_d  # Simulate "D" key press (right)
+                frame_index = 0  # Reset frame index for run animation
 
     # Handle horizontal movement
     if moving_right:
@@ -133,7 +123,6 @@ while running:
     for ball in balls:
         ball_rect = pygame.Rect(ball["x"] - ball_radius, ball["y"] - ball_radius, ball_radius * 2, ball_radius * 2)
         if monster_rect.colliderect(ball_rect):
-            # If the monster touches any ball, quit the game
             print("Collision detected! Game over.")
             running = False
 
@@ -142,10 +131,8 @@ while running:
     if frame_timer >= frame_delay:
         frame_timer = 0
         if is_idle:
-            # Ensure frame_index is within bounds for idle frames
             frame_index = (frame_index + 1) % len(idle_frames)  # Wrap index correctly
         else:
-            # Ensure frame_index is within bounds for running frames
             frame_index = (frame_index + 1) % len(run_frames)  # Wrap index correctly
 
     # Ensure frame_index is within bounds for the animation frames
@@ -160,13 +147,10 @@ while running:
 
     # Draw the appropriate animation
     if is_idle:
-        # Play idle animation
         screen.blit(idle_frames[frame_index], (x, y))
     elif moving_right:
-        # Play running right animation
         screen.blit(run_frames[frame_index], (x, y))
     elif moving_left:
-        # Play running left animation
         screen.blit(run_frames_left[frame_index], (x, y))
 
     # Draw the score at the top right
